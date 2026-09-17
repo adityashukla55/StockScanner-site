@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock Scanner — every market, one tab</title>
+<meta name="description" content="Build a portfolio, adjust it, project it and weigh the mix — stocks and ETFs from exchanges worldwide, all in one browser tab with no switching between apps. A viewer, not a broker: it never touches money, needs no account and collects nothing.">
+<meta property="og:title" content="Stock Scanner">
+<meta property="og:description" content="Every market, one tab. Build a portfolio, project it and weigh the mix — a viewer, not a broker: it never touches money, and collects nothing about you.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="shots/shot-detail.png">
+<link rel="icon" href="icon.png">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fg: #14161a; --bg: #ffffff; --muted: #5c6370; --line: #e3e6ea;
+    --panel: #f7f8fa; --accent: #c2410c; --accent-fg: #ffffff; --up: #0a7d34;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(16, 18, 22, .04), 0 12px 32px rgba(16, 18, 22, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fg: #e7e9ec; --bg: #0e1013; --muted: #99a0ab; --line: #272b31;
+      --panel: #16191d; --accent: #f97316; --accent-fg: #17110b; --up: #5dd47f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 40px rgba(0, 0, 0, .45);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 22px; }
+  a { color: inherit; }
+
+  /* ---------- reveal on scroll, skipped when motion is unwelcome ---------- */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .slides { scroll-behavior: auto !important; }
+  }
+
+  /* ---------- header ---------- */
+  header.top {
+    position: sticky; top: 0; z-index: 20;
+    backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 86%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+  .top .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: -0.01em; }
+  .brand img { width: 26px; height: 26px; border-radius: 7px; }
+  .top nav { display: flex; gap: 20px; align-items: center; font-size: 14px; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--fg); }
+  .top nav a.btn { color: var(--accent-fg); }
+  @media (max-width: 720px) { .top nav .hide-sm { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 72px 0 26px; text-align: center; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 13px; margin-bottom: 22px;
+  }
+  .pill b { color: var(--fg); font-weight: 600; }
+  .hero h1 { font-size: clamp(34px, 5.4vw, 54px); line-height: 1.08; letter-spacing: -0.03em; margin: 0 0 18px; }
+  .hero p.lead { font-size: 18px; color: var(--muted); margin: 0 auto 30px; max-width: 64ch; }
+  .hero p.lead strong { color: var(--fg); font-weight: 600; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 15px;
+    text-decoration: none; border: 1px solid var(--line); background: transparent; color: inherit;
+    cursor: pointer; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); border-color: var(--fg); }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn.primary:hover { box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .btn.pending { color: var(--muted); border-style: dashed; cursor: default; }
+  .btn.pending:hover { transform: none; border-color: var(--line); }
+  .top nav .btn { padding: 8px 15px; font-size: 14px; }
+  .cta-note { font-size: 13px; color: var(--muted); margin: 16px 0 0; }
+
+  /* ---------- carousel ---------- */
+  .showcase { padding: 30px 0 60px; }
+  .frame {
+    position: relative; border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--panel); box-shadow: var(--shadow); overflow: hidden;
+  }
+  .slides {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+    scrollbar-width: none;
+  }
+  .slides::-webkit-scrollbar { display: none; }
+  .slide { flex: 0 0 100%; scroll-snap-align: center; }
+  .slide img { display: block; width: 100%; height: auto; }
+
+  .arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--bg) 88%, transparent); border: 1px solid var(--line);
+    color: var(--fg); cursor: pointer; font-size: 17px; line-height: 1;
+    backdrop-filter: blur(6px); transition: transform .15s ease;
+  }
+  .arrow:hover { transform: translateY(-50%) scale(1.07); }
+  .arrow[disabled] { opacity: .35; cursor: default; }
+  .arrow.prev { left: 14px; }
+  .arrow.next { right: 14px; }
+  @media (max-width: 620px) { .arrow { display: none; } }
+
+  .tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+  .tab {
+    font: inherit; font-size: 14px; padding: 7px 15px; border-radius: 999px;
+    border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab[aria-selected="true"] { color: var(--accent-fg); background: var(--accent); border-color: var(--accent); }
+  .caption { text-align: center; color: var(--muted); font-size: 14.5px; margin: 14px auto 0; max-width: 64ch; min-height: 3em; }
+
+  /* ---------- sections ---------- */
+  section { padding: 62px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(24px, 3vw, 30px); letter-spacing: -0.02em; margin: 0 0 10px; }
+  .sub { color: var(--muted); margin: 0 0 34px; max-width: 64ch; }
+  .sub a[data-link] { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 20px; }
+  .card {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; background: var(--panel);
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--fg) 25%, var(--line)); }
+  .card h3 { margin: 0 0 8px; font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 40px; }
+  .stat b { display: block; font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -0.02em; line-height: 1.1; }
+  .stat span { color: var(--muted); font-size: 13.5px; }
+
+  .nomoney { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .nm {
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; background: var(--panel);
+    position: relative;
+  }
+  .nm-x {
+    display: grid; place-items: center; width: 22px; height: 22px; margin-bottom: 10px;
+    border-radius: 50%; font-size: 11px; font-weight: 700;
+    background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted);
+  }
+  .nm strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .nm span:not(.nm-x) { color: var(--muted); font-size: 14px; }
+
+  .privacy { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 18px; }
+  .fact { border-left: 2px solid var(--up); padding: 4px 0 4px 16px; }
+  .fact.disclaim { border-left-color: var(--muted); }
+  .fact strong { display: block; font-size: 15px; }
+  .fact span { color: var(--muted); font-size: 14px; }
+
+  table.perms { width: 100%; border-collapse: collapse; }
+  table.perms th, table.perms td { text-align: left; padding: 12px; border-bottom: 1px solid var(--line); font-size: 14.5px; vertical-align: top; }
+  table.perms th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  /* ---------- support ---------- */
+  .support { text-align: center; }
+  .support .sub { margin-left: auto; margin-right: auto; }
+  .sponsor-row { display: flex; gap: 28px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .qr { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  /* The QR is black on transparent: without its own light plate the modules
+     vanish on a dark background and the code will not scan. */
+  .qr img {
+    display: block; width: 148px; height: 148px;
+    background: #fff; padding: 9px; border-radius: 11px; border: 1px solid var(--line);
+  }
+  .qr figcaption { font-size: 12px; color: var(--muted); }
+
+  footer { border-top: 1px solid var(--line); padding: 32px 0 52px; color: var(--muted); font-size: 13.5px; }
+  footer p { margin: 0 0 7px; max-width: 86ch; }
+  .foot-links { margin-bottom: 14px; }
+  .foot-links a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .foot-links a:hover { border-bottom-color: currentColor; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <span class="brand"><img src="icon.png" alt="">Stock Scanner</span>
+    <nav>
+      <a href="#tour" class="hide-sm">Tour</a>
+      <a href="#privacy" class="hide-sm">Privacy</a>
+      <a href="#nomoney" class="hide-sm">No money</a>
+      <a href="#support" class="hide-sm">Support</a>
+      <a data-link="source" class="hide-sm" href="#">Source</a>
+      <a class="btn primary" data-link="addon" href="#">Add to Firefox</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="pill">🔒 <b>It watches markets, not you.</b> No account, no server, nothing collected.</span>
+    <h1>Every market. One tab.</h1>
+    <p class="lead">
+      Build a portfolio, adjust it, project it forward and weigh the mix — <strong>all without
+      leaving the tab</strong>. Exchanges worldwide, running entirely in your browser. A
+      dashboard, not a broker: it never touches money.
+    </p>
+    <div class="cta">
+      <a class="btn primary" data-link="addon" href="#">Add to Firefox — free</a>
+      <a class="btn" href="#tour">See it in action ↓</a>
+      <a class="btn" data-link="source" href="#">View source on GitHub</a>
+    </div>
+    <p class="cta-note">Free forever. No sign-up, no trial, no telemetry.</p>
+  </div>
+</div>
+
+<div class="wrap showcase reveal" id="tour">
+  <div class="frame">
+    <div class="slides" id="slides" tabindex="0" role="region" aria-label="Screenshots of Stock Scanner"></div>
+    <button class="arrow prev" id="prev" aria-label="Previous screenshot">‹</button>
+    <button class="arrow next" id="next" aria-label="Next screenshot">›</button>
+  </div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Choose a screenshot"></div>
+  <p class="caption" id="caption"></p>
+</div>
+
+<section id="markets">
+  <div class="wrap reveal">
+    <div class="stats">
+      <div class="stat"><b>51</b><span>exchange calendars, each in its own local hours</span></div>
+      <div class="stat"><b>20y</b><span>of candles, down to two-minute bars</span></div>
+      <div class="stat"><b>1</b><span>permission beyond the price feed: storage</span></div>
+      <div class="stat"><b>&euro;0</b><span>forever, with nothing to upsell</span></div>
+    </div>
+    <h2>The whole loop, one tab</h2>
+    <p class="sub">
+      Add a ticker, check what it is, see how it compares, enter what you hold, project it
+      forward, then weigh the mix — and go round again when something changes. Five views over
+      one watchlist, none of which sends you to another site.
+    </p>
+    <div class="grid">
+      <div class="card">
+        <h3>Watchlist and detail</h3>
+        <p>Live quotes every 15 seconds, paused while the tab is hidden. Candles from two minutes to twenty years, with company fundamentals alongside.</p>
+      </div>
+      <div class="card">
+        <h3>Compare</h3>
+        <p>Up to eight tickers rebased to a common start, so relative performance is readable rather than inferred from two charts side by side — across exchanges and currencies alike.</p>
+      </div>
+      <div class="card">
+        <h3>Portfolio</h3>
+        <p>Holdings with cost basis, plus the statistics that only exist across them: correlation, volatility and drawdown. Mixed currencies are totalled separately rather than added together.</p>
+      </div>
+      <div class="card">
+        <h3>Projection</h3>
+        <p>A lognormal model fitted to each ticker, drawn as percentile bands. Where options trade, volatility comes from the option market rather than from the past.</p>
+      </div>
+      <div class="card">
+        <h3>Pick your market</h3>
+        <p>Follow one market — India, Germany, Japan, Canada, wherever you actually invest — and search narrows to it while the clock reads its local hours. Switch any time, or choose All markets. It filters what you discover, never what you already hold.</p>
+      </div>
+      <div class="card">
+        <h3>Allocation</h3>
+        <p>Weights across your picks, with fit buttons that show what the maths suggests and are careful to say what they are not.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap reveal">
+    <h2>Private by construction, not by promise</h2>
+    <p class="sub">
+      Most tools ask you to trust a privacy policy. This one has no server to send anything to,
+      which is a different sort of claim — one you can check by
+      <a data-link="source" data-keep href="#">reading the source</a>.
+    </p>
+    <div class="privacy">
+      <div class="fact"><strong>No account</strong><span>Nothing to sign up for.</span></div>
+      <div class="fact"><strong>No server</strong><span>Prices go straight from Yahoo to your browser.</span></div>
+      <div class="fact"><strong>No telemetry</strong><span>No analytics, no error reporting, no pings.</span></div>
+      <div class="fact"><strong>Holdings stay yours</strong><span>Cost basis and position sizes live in browser storage alone.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal">
+    <h2>Every permission it asks for</h2>
+    <p class="sub">The whole list. An extension wanting more than this is doing more than this.</p>
+    <table class="perms">
+      <thead><tr><th>Permission</th><th>What it is for</th></tr></thead>
+      <tbody>
+        <tr><td><code>storage</code></td><td>Your watchlist, holdings, comparison and theme.</td></tr>
+        <tr><td><code>query1/query2.finance.yahoo.com</code></td><td>Quotes, candles, search, company profiles and option chains.</td></tr>
+        <tr><td><code>fc.yahoo.com</code></td><td>Issues the session cookie that option chains require.</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:22px">
+      It does not request <code>tabs</code>, reads no page you visit, and injects no content
+      script. It talks to no host but Yahoo.
+    </p>
+  </div>
+</section>
+
+<section id="nomoney">
+  <div class="wrap reveal">
+    <h2>It shows. It never touches money.</h2>
+    <p class="sub">
+      Stock Scanner is a viewer. It reads public market data and draws it. There is no path
+      through this extension by which a single currency unit could move, because none of the
+      machinery to do so exists in it.
+    </p>
+    <div class="nomoney">
+      <div class="nm"><span class="nm-x">✕</span><strong>No brokerage connection</strong><span>It links to no broker, bank or exchange account. There is nothing to connect.</span></div>
+      <div class="nm"><span class="nm-x">✕</span><strong>No trading</strong><span>No buy or sell button exists. It cannot place, cancel or route an order.</span></div>
+      <div class="nm"><span class="nm-x">✕</span><strong>No payments</strong><span>It never asks for card, bank or wallet details, and has no payment code in it.</span></div>
+      <div class="nm"><span class="nm-x">✕</span><strong>No credentials</strong><span>No logins to anything. The only permission beyond the price feed is browser storage.</span></div>
+    </div>
+    <p class="sub" style="margin-top:28px">
+      The holdings you type into the Portfolio tab are <strong>notes to yourself</strong> — numbers
+      you enter so the app can multiply them by a price. They are not a position, not linked to an
+      account, and visible to nobody but you.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap reveal">
+    <h2>What it does not do</h2>
+    <p class="sub">
+      Stock Scanner is for information only. It makes no promise about the future, and nothing
+      in it should be read as one.
+    </p>
+    <div class="privacy">
+      <div class="fact disclaim"><strong>It describes the past</strong><span>Every number starts from prices that have already happened.</span></div>
+      <div class="fact disclaim"><strong>It draws possibilities</strong><span>Projections are mathematical functions over that history, not predictions.</span></div>
+      <div class="fact disclaim"><strong>It recommends nothing</strong><span>No buy or sell signals, no portfolio advice, no opinion on any ticker.</span></div>
+      <div class="fact disclaim"><strong>It is not advice</strong><span>Not investment, financial, tax or legal advice. What you do with the numbers is yours.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="support" id="support">
+  <div class="wrap reveal">
+    <h2>Support the work</h2>
+    <p class="sub">
+      Stock Scanner is free and stays free — there is no paid tier waiting behind it. If it
+      saved you a subscription, a coffee is a kind way to say so.
+    </p>
+    <div class="sponsor-row">
+      <a class="btn" data-link="sponsor" href="#">☕ Buy me a coffee</a>
+      <figure class="qr">
+        <img src="bmc-qr.png" alt="QR code linking to the Buy Me a Coffee page" width="148" height="148" loading="lazy">
+        <figcaption>or scan</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="foot-links">
+      <a data-link="source" href="#">Source on GitHub</a> · <a href="#support">Support the work</a>
+    </p>
+    <p>Data from Yahoo Finance, for personal use. Quotes may be delayed up to 15 minutes.</p>
+    <p>For information only. Not investment advice, and not a promise about the future — the projections are arithmetic over past prices, describing possibilities rather than expectations.</p>
+  </div>
+</footer>
+
+<script src="links.js"></script>
+<script src="carousel.js"></script>
+</body>
+</html>
