@@ -14,7 +14,13 @@ const SHOTS = [
     tab: 'Detail',
     file: 'shots/shot-detail.png',
     caption:
-      'A watchlist spanning three currencies — dollars, euros, rupees and London’s pence — with candles from two minutes to twenty years.',
+      'A watchlist spanning four currencies — dollars, euros, rupees and London’s pence — with candles from two minutes to twenty years.',
+  },
+  {
+    tab: 'Groups',
+    file: 'shots/shot-groups.png',
+    caption:
+      'Sort your tickers into groups — a country, a currency, a theme — and every tab shows just that group. Fill one in a click by country or currency.',
   },
   {
     tab: 'Compare',
@@ -26,7 +32,7 @@ const SHOTS = [
     tab: 'Portfolio',
     file: 'shots/shot-portfolio.png',
     caption:
-      'Holdings in different currencies are totalled separately. Nothing here invents an exchange rate to add a euro to a rupee.',
+      'Enter what your broker shows — amount invested, fee, price per share — and the shares and gain are worked out. Each currency is totalled on its own.',
   },
   {
     tab: 'Projection',
@@ -38,7 +44,13 @@ const SHOTS = [
     tab: 'Allocation',
     file: 'shots/shot-allocation.png',
     caption:
-      'Weights across your picks, scored on how these tickers actually moved — a description of history rather than a recommendation.',
+      'Split a sum across your picks and see what it could become, as a total and as a yearly rate — a description of history, not a recommendation.',
+  },
+  {
+    tab: 'Backup',
+    file: 'shots/shot-backup.png',
+    caption:
+      'Moving to a new computer? Save your setup as a file or copy it as text, then load it there. Nothing is uploaded anywhere.',
   },
 ];
 
@@ -59,7 +71,7 @@ if (slides && tabs && caption) {
     img.src = shot.file;
     img.alt = `Stock Scanner: the ${shot.tab} view`;
     img.width = 1440;
-    img.height = 940;
+    img.height = 880;
     // Only the first shot is worth blocking on; the rest arrive as needed.
     img.loading = i === 0 ? 'eager' : 'lazy';
     img.decoding = 'async';

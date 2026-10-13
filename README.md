@@ -28,15 +28,17 @@ Connect to Git**. Every push then deploys, and each deployment stays reachable f
 Before that connection exists, the manual route still works: **Create deployment**, drag the
 `public` folder, done.
 
-## Before deploying, fill in two links
+## Links
 
-Both at the top of `public/links.js`, in the block marked `EDIT THESE`:
+All three are at the top of `public/links.js`, in the block marked `EDIT THESE`:
 
-- **The add-on link** — once Firefox review passes. Until then both "Add to Firefox" buttons
-  read *Coming to Firefox* rather than pointing nowhere.
+- **The add-on link** — `https://addons.mozilla.org/firefox/addon/stock-scanner/`, the public
+  Firefox listing. Do not use a `moz-extension://…` address: that only works inside one
+  person's Firefox, with a random id per install. If the link is ever set back to a
+  placeholder, the "Add to Firefox" buttons read *Coming to Firefox* rather than pointing
+  nowhere.
 - **The source repo** — that button removes itself while unset.
-
-The Buy Me a Coffee link is already set, and matches `src/links.js` in the extension.
+- **Buy Me a Coffee** — matches `src/links.js` in the extension.
 
 ## The screenshots
 
@@ -44,16 +46,23 @@ The Buy Me a Coffee link is already set, and matches `src/links.js` in the exten
 the dev server with a watchlist that deliberately spans dollars, euros and pence so the
 multi-currency handling is visible.
 
-To regenerate them after a UI change, from the extension project:
+There are seven: Detail, Groups (with the group editor open), Compare, Portfolio,
+Projection, Allocation and Backup (the Backup & move panel).
+
+To regenerate them after a UI change, from the extension project (it sits next to this one):
 
 ```bash
 npm install --no-save puppeteer-core
 npm run dev            # dev server + Yahoo proxy, on :5320
-npm run screenshots    # writes into this site's public/shots
+npm run screenshots    # writes into ../StockScanner-site/public/shots
 ```
 
-Captured at 1.5× for retina without the weight of 2× — about 1.1 MB for all five, of which
-only the first loads up front; the rest are lazy.
+The script finds Chrome on Windows, macOS and Linux. Set `CHROME` to point at another
+browser binary, and `CHROME_PROFILE` to a folder of your own if Chrome refuses to start with
+a temporary profile.
+
+Captured at 1440×880 and 1.5× for retina without the weight of 2×. Only the first loads up
+front; the rest are lazy.
 
 ## The carousel
 

@@ -8,7 +8,7 @@
 <meta property="og:title" content="Stock Scanner">
 <meta property="og:description" content="Every market, one tab. Build a portfolio, project it and weigh the mix — a viewer, not a broker: it never touches money, and collects nothing about you.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="shots/shot-detail.png">
+<meta property="og:image" content="https://stockscanner.pages.dev/shots/shot-detail.png">
 <link rel="icon" href="icon.png">
 <style>
   :root {
@@ -241,7 +241,7 @@
     <p class="sub">
       Add a ticker, check what it is, see how it compares, enter what you hold, project it
       forward, then weigh the mix — and go round again when something changes. Five views over
-      one watchlist, none of which sends you to another site.
+      one watchlist, sorted into groups if you like, none of which sends you to another site.
     </p>
     <div class="grid">
       <div class="card">
@@ -249,12 +249,16 @@
         <p>Live quotes every 15 seconds, paused while the tab is hidden. Candles from two minutes to twenty years, with company fundamentals alongside.</p>
       </div>
       <div class="card">
+        <h3>Groups</h3>
+        <p>Sort tickers into groups — India, Europe, EUR, Tech, whatever you follow. Pick one and every tab shows only that group, from the watchlist to the portfolio totals. Fill a group in one click by country or currency.</p>
+      </div>
+      <div class="card">
         <h3>Compare</h3>
         <p>Up to eight tickers rebased to a common start, so relative performance is readable rather than inferred from two charts side by side — across exchanges and currencies alike.</p>
       </div>
       <div class="card">
         <h3>Portfolio</h3>
-        <p>Holdings with cost basis, plus the statistics that only exist across them: correlation, volatility and drawdown. Mixed currencies are totalled separately rather than added together.</p>
+        <p>Enter what your broker shows: the amount invested, the fee and the price per share. Shares, value and gain are worked out for you — fractional shares too. Type any price to see what your shares would be worth. Each currency is totalled on its own.</p>
       </div>
       <div class="card">
         <h3>Projection</h3>
@@ -266,7 +270,11 @@
       </div>
       <div class="card">
         <h3>Allocation</h3>
-        <p>Weights across your picks, with fit buttons that show what the maths suggests and are careful to say what they are not.</p>
+        <p>Split a sum across your picks and see what it could become, as a total and as a yearly rate. Fit buttons show what the maths suggests and are careful to say what they are not.</p>
+      </div>
+      <div class="card">
+        <h3>Backup &amp; move</h3>
+        <p>New computer? Download your setup as a file or copy it as text, then load it there — add to what you have or replace it, with undo. Nothing is uploaded anywhere.</p>
       </div>
     </div>
   </div>
@@ -284,7 +292,8 @@
       <div class="fact"><strong>No account</strong><span>Nothing to sign up for.</span></div>
       <div class="fact"><strong>No server</strong><span>Prices go straight from Yahoo to your browser.</span></div>
       <div class="fact"><strong>No telemetry</strong><span>No analytics, no error reporting, no pings.</span></div>
-      <div class="fact"><strong>Holdings stay yours</strong><span>Cost basis and position sizes live in browser storage alone.</span></div>
+      <div class="fact"><strong>Holdings stay yours</strong><span>What you invested and hold lives in browser storage alone.</span></div>
+      <div class="fact"><strong>Backups stay with you</strong><span>A backup is a file you save yourself. It is never uploaded.</span></div>
     </div>
   </div>
 </section>
@@ -296,7 +305,7 @@
     <table class="perms">
       <thead><tr><th>Permission</th><th>What it is for</th></tr></thead>
       <tbody>
-        <tr><td><code>storage</code></td><td>Your watchlist, holdings, comparison and theme.</td></tr>
+        <tr><td><code>storage</code></td><td>Your watchlist, groups, holdings, comparison and theme.</td></tr>
         <tr><td><code>query1/query2.finance.yahoo.com</code></td><td>Quotes, candles, search, company profiles and option chains.</td></tr>
         <tr><td><code>fc.yahoo.com</code></td><td>Issues the session cookie that option chains require.</td></tr>
       </tbody>

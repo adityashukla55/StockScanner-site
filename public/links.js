@@ -9,8 +9,8 @@ const LINKS = {
   // Your Buy Me a Coffee page. Keep it the same as src/links.js in the extension.
   sponsor: 'https://buymeacoffee.com/adi.shukla41',
 
-  // Fill in once Firefox review passes.
-  addon: 'https://addons.mozilla.org/firefox/addon/YOUR_ADDON',
+  // The listing on addons.mozilla.org. Mozilla sends each visitor to their own language.
+  addon: 'https://addons.mozilla.org/firefox/addon/stock-scanner/',
 
   // Where the code lives, and where Chrome users get install instructions.
   source: 'https://github.com/adityashukla55/StockScanner',
