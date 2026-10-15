@@ -83,7 +83,8 @@
   .btn.pending { color: var(--muted); border-style: dashed; cursor: default; }
   .btn.pending:hover { transform: none; border-color: var(--line); }
   .top nav .btn { padding: 8px 15px; font-size: 14px; }
-  .cta-note { font-size: 13px; color: var(--muted); margin: 16px 0 0; }
+  .cta-note { font-size: clamp(18px, 2.2vw, 22px); font-weight: 650; letter-spacing: -0.01em; color: var(--fg); margin: 24px 0 0; }
+  .cta-note strong { color: var(--accent); font-weight: 750; }
 
   /* ---------- carousel ---------- */
   .showcase { padding: 30px 0 60px; }
@@ -215,7 +216,7 @@
       <a class="btn" href="#tour">See it in action ↓</a>
       <a class="btn" data-link="source" href="#">View source on GitHub</a>
     </div>
-    <p class="cta-note">Free forever. No sign-up, no trial, no telemetry.</p>
+    <p class="cta-note"><strong>Free forever.</strong> No sign-up, no trial, no telemetry.</p>
   </div>
 </div>
 
